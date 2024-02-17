@@ -1,0 +1,104 @@
+﻿@page "/students"
+@using InfilionStudentManagement.DAL.Models
+@using Microsoft.AspNetCore.Components.Forms
+@using System.Text.Json
+
+
+<div class="container">
+    <h3>Add Data</h3>
+
+    @if (showSuccessMessage)
+    {
+        <p class="success-message">Student added successfully!</p>
+    }
+
+    <EditForm Model="@newStudent" OnValidSubmit="AddStudent">
+        <DataAnnotationsValidator />
+
+        <ValidationSummary />
+
+        <div class="form-group">
+            <label for="name">Name:</label>
+            <InputText id="name" class="form-control" @bind-Value="newStudent.Name" />
+            <ValidationMessage For="@(() => newStudent.Name)" />
+        </div>
+
+        <div class="form-group">
+            <label for="class">Class:</label>
+            <select id="class" class="form-control" @bind="@newStudent.Class">
+                <option value="ClassA">Class A</option>
+                <option value="ClassB">Class B</option>
+                <option value="ClassC">Class C</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Add Student</button>
+    </EditForm>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Age</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in items)
+            {
+                <tr>
+                    <td>@item.Id</td>
+                    <td>@item.Name</td>
+                    <td>@item.Age</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+@code {
+
+    List<TblStudents> items = new List<TblStudents>();
+    private TblStudents newStudent = new TblStudents();
+    private bool showSuccessMessage = false;
+    HttpResponseMessage res = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // items.Add(new Item { Id = 1, Name = "John", Age = 30 });
+
+        await GetAllStudents();
+        base.OnInitialized();
+    }
+
+    public async Task AddStudent()
+    {
+        res = await httpClient.PostAsJsonAsync("https://localhost:7201//api/Student/AddStudent", newStudent);
+
+        if (res.IsSuccessStatusCode)
+        {
+            await GetAllStudents();
+            StateHasChanged();
+        }
+        else
+        {
+        }
+    }
+
+    public async Task GetAllStudents()
+    {
+        res = await httpClient.GetAsync("https://localhost:7201/api/Student/GetStudents/");
+
+        if (res.IsSuccessStatusCode)
+        {
+            var _options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                };
+            items = System.Text.Json.JsonSerializer.Deserialize<List<TblStudents>>(await res.Content.ReadAsStringAsync(), _options);
+            StateHasChanged();
+        }
+        else
+        {
+        }
+    }
+}

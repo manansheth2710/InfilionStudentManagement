@@ -1,3 +1,13 @@
+.container {
+    margin: 0 auto;
+    max-width: 600px; /* Adjust as needed */
+    padding: 0 20px; /* Add margin on both sides */
+}
+
+.success-message {
+    color: green;
+}
+
 #blazor-error-ui {
     background: lightyellow;
     bottom: 0;
